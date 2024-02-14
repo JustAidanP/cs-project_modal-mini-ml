@@ -1,0 +1,34 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           modal-mini-ml
+version:        0.1.0.0
+description:    An implementation of type inference using bidirectionalisation for the Modal Mini ML presented by Davies and Pfenning in [Rowan Davies and Frank Pfenning. 2001. A modal analysis of staged computation. J. ACM 48, 3 (May 2001), 555–604. https://doi.org/10.1145/382780.382785]
+homepage:       https://github.com/JustAidanP/cs-project_modal-mini-ml#readme
+bug-reports:    https://github.com/JustAidanP/cs-project_modal-mini-ml/issues
+author:         Aidan Price
+maintainer:     Aidan Price
+copyright:      2024 Aidan Price
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/JustAidanP/cs-project_modal-mini-ml
+
+executable modal-mini-ml-exe
+  main-is: Main.hs
+  other-modules:
+      Terms
+      Types
+      Paths_modal_mini_ml
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010

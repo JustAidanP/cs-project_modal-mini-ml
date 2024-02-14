@@ -1,0 +1,41 @@
+name:                modal-mini-ml
+version:             0.1.0.0
+github:              "JustAidanP/cs-project_modal-mini-ml"
+author:              "Aidan Price"
+copyright:           "2024 Aidan Price"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:        An implementation of type inference using bidirectionalisation for the Modal Mini ML presented by Davies and Pfenning in [Rowan Davies and Frank Pfenning. 2001. A modal analysis of staged computation. J. ACM 48, 3 (May 2001), 555–604. https://doi.org/10.1145/382780.382785] 
+
+dependencies:
+- base >= 4.7 && < 5
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+executables:
+  modal-mini-ml-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
