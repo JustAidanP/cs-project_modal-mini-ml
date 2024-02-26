@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -23,8 +23,6 @@ source-repository head
 executable modal-mini-ml-exe
   main-is: Main.hs
   other-modules:
-      Terms
-      Types
       Paths_modal_mini_ml
   hs-source-dirs:
       app

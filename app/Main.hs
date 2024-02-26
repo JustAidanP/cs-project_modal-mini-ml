@@ -1,16 +1,10 @@
 module Main (main) where
 
-import Types
-import Terms
+import Monomorphic.Types
+import Monomorphic.Terms
+import Monomorphic.Bidirectional
 
-test = Application {
-    lambda = Lambda {
-        variable = "x",
-        variable_annotation = Unit,
-        body = EmptyProduct
-    },
-    argument = EmptyProduct
-}
+test = Application (Lambda "x" Unit EmptyProduct) EmptyProduct
 
 
 
