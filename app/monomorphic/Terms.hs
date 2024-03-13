@@ -11,7 +11,7 @@ data Term = Var Variable
             | Pair Term Term
             | First Term
             | Second Term
-            | EmptyProduct
+            | EmptyPair
             | Zero
             | Succ Term
             | Case Term Term Variable Term
