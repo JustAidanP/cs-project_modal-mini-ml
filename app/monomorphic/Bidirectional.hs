@@ -122,7 +122,7 @@ typeSynthesising mctx octx tm@(ModalVar mvar) =
 -- B-SYNTHESISING-LETBOX
 typeSynthesising mctx octx tm@(LetBox var ofBody inBody) = 
     case firstPremise of
-        TypeSynthesises _ _ _ ofty -> 
+        TypeSynthesises _ _ _ (Boxed ofty) -> 
             case secondPremise of
                 TypeSynthesises _ _ _ bodyty -> TypeSynthesises [firstPremise, secondPremise] (mctx, octx) tm bodyty
                 _ -> DoesNotSynthesise [firstPremise, secondPremise] (mctx, octx) tm

@@ -103,5 +103,8 @@ power = LetBox "times" (Anno (Box times) (Boxed (Abstraction Natural (Abstractio
 --  | = ·; · ├ let box times = (box let box plus = (box 𝛌n:nat.fix p:(nat -> nat).𝛌m:nat.(case m of z => n | s x => s (p)x) : ☐(nat -> (nat -> nat))) in 𝛌n:nat.fix t:(nat -> nat).𝛌m:nat.(case m of z => z | s x => ((plus)n)(t)x) : ☐(nat -> (nat -> nat))) in fix p:(nat -> ☐(nat -> nat)).𝛌n:nat.(case n of z => box 𝛌x:nat.s z | s m => let box q = (p)m in box 𝛌x:nat.((times)x)(q)x) <= (nat -> ☐(nat -> nat))
 --  = ·; · ├ (let box times = (box let box plus = (box 𝛌n:nat.fix p:(nat -> nat).𝛌m:nat.(case m of z => n | s x => s (p)x) : ☐(nat -> (nat -> nat))) in 𝛌n:nat.fix t:(nat -> nat).𝛌m:nat.(case m of z => z | s x => ((plus)n)(t)x) : ☐(nat -> (nat -> nat))) in fix p:(nat -> ☐(nat -> nat)).𝛌n:nat.(case n of z => box 𝛌x:nat.s z | s m => let box q = (p)m in box 𝛌x:nat.((times)x)(q)x) : (nat -> ☐(nat -> nat))) => (nat -> ☐(nat -> nat))
 
+base_5 = Application (Anno power (Abstraction Natural (Boxed (Abstraction Natural Natural)))) (Succ (Succ (Succ (Succ (Succ Zero)))))
+
+
 main :: IO ()
 main = print "Hello World"
