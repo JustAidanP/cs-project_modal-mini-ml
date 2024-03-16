@@ -19,5 +19,30 @@ power = Fix "p" (Abstraction Natural (Boxed (Abstraction Natural Natural)))
                     "m" (LetBox "q" (Application (Var "p") (Var "m")) 
                             (Box (Lambda "x" Natural (Application (Application (Var "times") (Var "x")) (Application (ModalVar "q") (Var "x"))))))))
 
+-- λ typeSynthesising MEmpty OEmpty (Anno power (Abstraction Natural (Boxed (Abstraction Natural Natural))))
+--  | | | | | = ·; n:nat, p:(nat -> ☐(nat -> nat)), · ├ n => nat
+--  | | | | = ·; n:nat, p:(nat -> ☐(nat -> nat)), · ├ n <= nat
+--  | | | | | | | = ·; x:nat, · ├ z <= nat
+--  | | | | | | = ·; x:nat, · ├ s z <= nat
+--  | | | | | = ·; · ├ 𝛌x:nat.s z <= (nat -> nat)
+--  | | | | = ·; n:nat, p:(nat -> ☐(nat -> nat)), · ├ box 𝛌x:nat.s z <= ☐(nat -> nat)
+--  | | | | | | = ·; m:nat, n:nat, p:(nat -> ☐(nat -> nat)), · ├ p => (nat -> ☐(nat -> nat))
+--  | | | | | | | = ·; m:nat, n:nat, p:(nat -> ☐(nat -> nat)), · ├ m => nat
+--  | | | | | | = ·; m:nat, n:nat, p:(nat -> ☐(nat -> nat)), · ├ m <= nat
+--  | | | | | = ·; m:nat, n:nat, p:(nat -> ☐(nat -> nat)), · ├ (p)m => ☐(nat -> nat)
+--  | | | | | | | | | | = q:(nat -> nat), ·; x:nat, · ├ times =\>
+--  | | | | | | | | | | = No Derivation
+--  | | | | | | | | | = q:(nat -> nat), ·; x:nat, · ├ (times)x =\>
+--  | | | | | | | | | = No Derivation
+--  | | | | | | | | = q:(nat -> nat), ·; x:nat, · ├ ((times)x)(q)x =\>
+--  | | | | | | | = q:(nat -> nat), ·; x:nat, · ├ ((times)x)(q)x <\= nat
+--  | | | | | | = q:(nat -> nat), ·; · ├ 𝛌x:nat.((times)x)(q)x <\= (nat -> nat)
+--  | | | | | = q:(nat -> nat), ·; m:nat, n:nat, p:(nat -> ☐(nat -> nat)), · ├ box 𝛌x:nat.((times)x)(q)x <\= ☐(nat -> nat)
+--  | | | | = ·; m:nat, n:nat, p:(nat -> ☐(nat -> nat)), · ├ let box q = (p)m in box 𝛌x:nat.((times)x)(q)x <\= ☐(nat -> nat)
+--  | | | = ·; n:nat, p:(nat -> ☐(nat -> nat)), · ├ (case n of z => box 𝛌x:nat.s z | s "m" => let box q = (p)m in box 𝛌x:nat.((times)x)(q)x) <\= ☐(nat -> nat)
+--  | | = ·; p:(nat -> ☐(nat -> nat)), · ├ 𝛌n:nat.(case n of z => box 𝛌x:nat.s z | s "m" => let box q = (p)m in box 𝛌x:nat.((times)x)(q)x) <\= (nat -> ☐(nat -> nat))
+--  | = ·; · ├ fix "p":(nat -> ☐(nat -> nat)).𝛌n:nat.(case n of z => box 𝛌x:nat.s z | s "m" => let box q = (p)m in box 𝛌x:nat.((times)x)(q)x) <\= (nat -> ☐(nat -> nat))
+--  = ·; · ├ (fix "p":(nat -> ☐(nat -> nat)).𝛌n:nat.(case n of z => box 𝛌x:nat.s z | s "m" => let box q = (p)m in box 𝛌x:nat.((times)x)(q)x) : (nat -> ☐(nat -> nat))) <\= (nat -> ☐(nat -> nat))
+
 main :: IO ()
 main = print "Hello World"

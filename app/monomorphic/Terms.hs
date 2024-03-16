@@ -31,6 +31,6 @@ instance Show Term where
     show (EmptyPair) = "⟨⟩"
     show (Zero) = "z"
     show (Succ prev) = "s " ++ show prev
-    show (Case depend zeroCase ident succCase) = "(case " ++ show depend ++ " of z => " ++ show zeroCase ++ " | s " ++ show ident ++ " => " ++ show succCase ++")"
-    show (Fix funcIdent funcTy body) = "fix " ++ show funcIdent ++ ":" ++ show funcTy ++ "." ++ show body
+    show (Case depend zeroCase ident succCase) = "(case " ++ show depend ++ " of z => " ++ show zeroCase ++ " | s " ++ ident ++ " => " ++ show succCase ++")"
+    show (Fix funcIdent funcTy body) = "fix " ++ funcIdent ++ ":" ++ show funcTy ++ "." ++ show body
     show (Anno term termTy) = "(" ++ show term ++ " : " ++ show termTy ++")"
