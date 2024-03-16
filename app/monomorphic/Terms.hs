@@ -30,7 +30,7 @@ instance Show Term where
     show (Second pair) = "snd " ++ show pair
     show (EmptyPair) = "⟨⟩"
     show (Zero) = "z"
-    show (Succ prev) = "s " ++ show prev
+    show (Succ prev) = "(s " ++ show prev ++ ")"
     show (Case depend zeroCase ident succCase) = "(case " ++ show depend ++ " of z => " ++ show zeroCase ++ " | s " ++ ident ++ " => " ++ show succCase ++")"
     show (Fix funcIdent funcTy body) = "fix " ++ funcIdent ++ ":" ++ show funcTy ++ "." ++ show body
     show (Anno term termTy) = "(" ++ show term ++ " : " ++ show termTy ++")"
@@ -47,7 +47,7 @@ latexPrintTm (First pair) = "\\textbf{fst}\\ " ++ latexPrintTm pair
 latexPrintTm (Second pair) = "\\textbf{snd}\\ " ++ latexPrintTm pair
 latexPrintTm (EmptyPair) = "⟨⟩"
 latexPrintTm (Zero) = "\\textbf{z}"
-latexPrintTm (Succ prev) = "\\textbf{s}\\ " ++ latexPrintTm prev
+latexPrintTm (Succ prev) = "(\\textbf{s}\\ " ++ latexPrintTm prev ++ ")"
 latexPrintTm (Case depend zeroCase ident succCase) = "(\\textbf{case}\\ " ++ latexPrintTm depend ++ " \\ \\textbf{of}\\ z \\Rightarrow " ++ latexPrintTm zeroCase ++ " \\mid s\\ " ++ "\\underline{" ++ ident ++ "}" ++ " \\Rightarrow " ++ latexPrintTm succCase ++")"
 latexPrintTm (Fix funcIdent funcTy body) = "\\textbf{fix}\\ " ++ "\\underline{" ++ funcIdent ++ "}" ++ "\\mathbin{:}" ++ latexPrintTy funcTy ++ "." ++ latexPrintTm body
 latexPrintTm (Anno term termTy) = "(" ++ latexPrintTm term ++ " \\mathbin{:} " ++ latexPrintTy termTy ++")"

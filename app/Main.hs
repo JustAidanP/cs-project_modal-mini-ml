@@ -106,5 +106,33 @@ power = LetBox "times" (Anno (Box times) (Boxed (Abstraction Natural (Abstractio
 base_5 = Application (Anno power (Abstraction Natural (Boxed (Abstraction Natural Natural)))) (Succ (Succ (Succ (Succ (Succ Zero)))))
 
 
+-- e.g. `writeFile "deriv__5-to-the-3.tex" (latexPrint (latexPrintDeriv (typeSynthesising MEmpty OEmpty (LetBox "base" (Anno base_5 (Boxed (Abstraction Natural Natural))) (Application (ModalVar "base") (Succ (Succ (Succ Zero))))))))`
+--      Then: `latexmk -pdf deriv__5-to-the-3.tex && latexmk -c`
+latexPrint t = unlines ["\\documentclass[preview, varwidth=1000em]{standalone}",
+
+    "\\usepackage{amsmath}",
+    "\\usepackage{amssymb}",
+    "\\usepackage{amsthm}",
+
+    "\\usepackage{graphicx}",
+    "\\usepackage{svg}",
+    "\\usepackage{subcaption}",
+
+    "\\usepackage{tikz}",
+    "\\usepackage{pgfplots}",
+
+    "\\usepackage{xcolor}",
+
+    "\\usepackage{mathpartir}",
+
+    "\\begin{document}",
+    "\\begin{equation*}",
+
+    t,
+
+    "\\end{equation*}",
+    "\\end{document}"
+    ]
+
 main :: IO ()
 main = print "Hello World"
