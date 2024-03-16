@@ -11,13 +11,27 @@ test = Application (Lambda "x" Unit EmptyPair) EmptyPair
 
 -- let box u = box \x:1.x in u <>
 
+plus = Lambda "n" Natural 
+            (Fix "p" (Abstraction Natural Natural)
+                (Lambda "m" Natural 
+                    (Case (Var "m") 
+                        (Var "n")
+                        "x" (Succ (Application (Var "p") (Var "x"))))))
+
+times = Lambda "n" Natural 
+            (Fix "t" (Abstraction Natural Natural)
+                (Lambda "m" Natural 
+                    (Case (Var "m") 
+                        Zero
+                        "x" (Application (Application (Anno plus (Abstraction Natural (Abstraction Natural Natural))) (Var "n")) (Application (Var "t") (Var "x"))))))
+
 -- An example, taken from Davies and Pfenning, "A Modal Analysis of Staged Computation"
 power = Fix "p" (Abstraction Natural (Boxed (Abstraction Natural Natural))) 
             (Lambda "n" Natural 
                 (Case (Var "n") 
                     (Box (Lambda "x" Natural (Succ Zero))) 
                     "m" (LetBox "q" (Application (Var "p") (Var "m")) 
-                            (Box (Lambda "x" Natural (Application (Application (Var "times") (Var "x")) (Application (ModalVar "q") (Var "x"))))))))
+                            (Box (Lambda "x" Natural (Application (Application (Anno times (Abstraction Natural (Abstraction Natural Natural))) (Var "x")) (Application (ModalVar "q") (Var "x"))))))))
 
 -- λ typeSynthesising MEmpty OEmpty (Anno power (Abstraction Natural (Boxed (Abstraction Natural Natural))))
 --  | | | | | = ·; n:nat, p:(nat -> ☐(nat -> nat)), · ├ n => nat

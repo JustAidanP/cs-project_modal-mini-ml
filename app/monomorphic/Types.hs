@@ -10,3 +10,10 @@ instance Show Type where
     show (Product left right) = "(" ++ show left ++ " ⨉ " ++ show right ++ ")"
     show Unit = "1"
     show (Boxed ty) = "☐" ++ show ty
+
+latexPrintTy :: Type -> String
+latexPrintTy Natural = "\\textbf{nat}"
+latexPrintTy (Abstraction from to) = "(" ++ latexPrintTy from ++ " \\rightarrow\\ " ++ latexPrintTy to ++ ")"
+latexPrintTy (Product left right) = "(" ++ latexPrintTy left ++ " \\cross\\ " ++ latexPrintTy right ++ ")"
+latexPrintTy Unit = "1"
+latexPrintTy (Boxed ty) = "\\Box\\ " ++ latexPrintTy ty
