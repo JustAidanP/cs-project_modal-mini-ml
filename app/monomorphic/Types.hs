@@ -14,6 +14,6 @@ instance Show Type where
 latexPrintTy :: Type -> String
 latexPrintTy Natural = "\\textbf{nat}"
 latexPrintTy (Abstraction from to) = "(" ++ latexPrintTy from ++ " \\rightarrow\\ " ++ latexPrintTy to ++ ")"
-latexPrintTy (Product left right) = "(" ++ latexPrintTy left ++ " \\cross\\ " ++ latexPrintTy right ++ ")"
+latexPrintTy (Product left right) = "(" ++ latexPrintTy left ++ " \\times\\ " ++ latexPrintTy right ++ ")"
 latexPrintTy Unit = "1"
 latexPrintTy (Boxed ty) = "\\Box\\ " ++ latexPrintTy ty

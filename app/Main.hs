@@ -2,9 +2,10 @@ module Main (main) where
 
 import Monomorphic.Types
 import Monomorphic.Terms
-import Monomorphic.Bidirectional
-import Monomorphic.Derivation
+-- import Monomorphic.Bidirectional
+-- import Monomorphic.Derivation
 import Monomorphic.Context
+import Monomorphic.Simple.Inference
 
 -- (\x:1.<>) <>
 test = Application (Lambda "x" Unit EmptyPair) EmptyPair
@@ -106,9 +107,12 @@ power = LetBox "times" (Anno (Box times) (Boxed (Abstraction Natural (Abstractio
 base_5 = Application (Anno power (Abstraction Natural (Boxed (Abstraction Natural Natural)))) (Succ (Succ (Succ (Succ (Succ Zero)))))
 
 
+-- CompileTime -> RunTime
+comp_runtime = LetBox "base" (Anno base_5 (Boxed (Abstraction Natural Natural))) (Anno (Box (Lambda "n" Natural (Application (ModalVar "base") (Var "n")))) (Boxed (Abstraction Natural Natural)))
+
 -- e.g. `writeFile "deriv__5-to-the-3.tex" (latexPrint (latexPrintDeriv (typeSynthesising MEmpty OEmpty (LetBox "base" (Anno base_5 (Boxed (Abstraction Natural Natural))) (Application (ModalVar "base") (Succ (Succ (Succ Zero))))))))`
 --      Then: `latexmk -pdf deriv__5-to-the-3.tex && latexmk -c`
-latexPrint t = unlines ["\\documentclass[preview, varwidth=1000em]{standalone}",
+latexPrint t = unlines ["\\documentclass[preview, varwidth=6000em]{standalone}",
 
     "\\usepackage{amsmath}",
     "\\usepackage{amssymb}",

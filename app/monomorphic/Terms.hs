@@ -2,21 +2,21 @@ module Monomorphic.Terms where
 
 import Monomorphic.Types
 
-data Term = Var Variable 
-            | Lambda Variable Type Term
-            | Application Term Term
-            | ModalVar Variable
-            | Box Term
-            | LetBox Variable Term Term
-            | Pair Term Term
-            | First Term
-            | Second Term
-            | EmptyPair
-            | Zero
-            | Succ Term
-            | Case Term Term Variable Term
-            | Fix Variable Type Term
-            | Anno Term Type
+data Term = Var Variable                    -- x
+            | Lambda Variable Type Term     -- 𝛌x:A.E
+            | Application Term Term         -- E E'
+            | ModalVar Variable             -- u
+            | Box Term                      -- box E
+            | LetBox Variable Term Term     -- let box u = E in E'
+            | Pair Term Term                -- <E, E'>
+            | First Term                    -- fst E
+            | Second Term                   -- snd E
+            | EmptyPair                     -- <>
+            | Zero                          -- Z
+            | Succ Term                     -- s E
+            | Case Term Term Variable Term  -- (case E of z => E' | s x => E'')
+            | Fix Variable Type Term        -- fix x:A.E
+            | Anno Term Type                -- (E : A)
 
 instance Show Term where
     show (Var ident) = ident
