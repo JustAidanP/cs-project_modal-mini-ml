@@ -31,12 +31,13 @@ data SynthesisingError
 typeCheck :: ModalContext -> OrdinaryContext -> Term -> Type -> Maybe CheckingError
 typeCheck _ _ _ _ = Nothing
 -- B-LAM
-typeCheck mctx octx tm@(Lambda var anno body) ty@(Abstraction fromType toType) | anno == toType =
+typeCheck mctx octx tm@(Lambda var anno body) ty@(Abstraction fromType toType) | anno == fromType =
   case premise of
     Nothing -> Nothing
     Just err -> Just (ChkPremiseFails (PrmTypeCheckingFails err))
   where
     premise = typeCheck mctx (OCons var fromType octx) body toType
+typeCheck mctx octx tm@(Lambda var anno body) ty@(Abstraction fromType toType) = Just (ChkPremiseFails (PrmTypesNotEqual anno ty))
 typeCheck mctx octx tm@(Lambda var anno body) ty = Just (ChkWrongForm (FmAbstraction FmMetaVariable FmMetaVariable) ty)
 
 -- B-BOX
@@ -114,7 +115,7 @@ typeCheck mctx octx tm@(Fix var anno body) ty | anno == ty =
     Just err -> Just (ChkPremiseFails (PrmTypeCheckingFails err))
   where
     premise = typeCheck mctx (OCons var anno octx) body anno
-typeCheck mctx octx tm@(Fix var anno body) ty = Just (ChkWrongForm (FmAbstraction FmMetaVariable FmMetaVariable) ty)
+typeCheck mctx octx tm@(Fix var anno body) ty = Just (ChkPremiseFails (PrmTypesNotEqual anno ty))
 
 -- B-CHANGE-DIR
 typeCheck inMctx inOctx inTm inTy = 
