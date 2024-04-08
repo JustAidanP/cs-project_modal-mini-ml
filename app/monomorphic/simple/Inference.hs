@@ -29,7 +29,6 @@ data SynthesisingError
   deriving (Show)
 
 typeCheck :: ModalContext -> OrdinaryContext -> Term -> Type -> Maybe CheckingError
-typeCheck _ _ _ _ = Nothing
 -- B-LAM
 typeCheck mctx octx tm@(Lambda var anno body) ty@(Abstraction fromType toType) | anno == fromType =
   case premise of
