@@ -1,25 +1,35 @@
-module Monomorphic.Simple.Inference where
+module Polymorphic.Simple.Inference where
 
-import Monomorphic.Context
-import Monomorphic.Terms
-import Monomorphic.Types
+import Polymorphic.Context
+import Polymorphic.Terms
+import Polymorphic.Types
 
-data Form = FmNatural | FmAbstraction Form Form | FmProduct Form Form | FmUnit | FmBoxed Form | FmMetaVariable
+import Data.List
+
+-- Generalises a type to qunaitfy over all free type variables in the type
+-- Where a type variable is free iff it isn't already bound, and it doesn't occur free in either context
+gen :: ModalContext -> OrdinaryContext -> PolyType -> PolyType
+gen mctx octx polyTy = foldl (\ty -> \var -> (TypeAbstraction var ty)) polyTy fv
+  where fv = (freeVariablesPolyType polyTy) \\ ((freeVariablesModalCtx mctx) ++ (freeVariablesOrdinaryCtx octx))
+
+data Form = FmNatural | FmAbstraction Form Form | FmProduct Form Form | FmUnit | FmBoxed Form | FmMetaVariable | FmTypeVariable
   deriving (Show, Eq)
 
 data PremiseError
   = PrmVariableNotInOrdinaryContext Variable -- Ordinary Variable not found
   | PrmVariableNotInModalContext Variable -- Modal Variable not found
-  | PrmTypesNotEqual Type Type -- Type Mismatch
+  | PrmTypesNotEqual MonoType MonoType -- Type Mismatch
   | PrmTypeCheckingFails CheckingError
   | PrmTypeSynthesisesFails SynthesisingError
-  | PrmSynthesisesWrongForm Form Type -- This term has a type of an unexpected form
+  | PrmSynthesisesWrongForm Form MonoType -- This term has a type of an unexpected form
+  | PrmTypeVariableSubstitutionIncomplete PolyType TypeVariableMapping -- The monotype is not an instance of the polytype
+  | PrmPolyTypeMustBeInstantiated PolyType
   deriving (Show)
 
 data CheckingError
-  = ChkWrongForm Form Type -- The type of this term cannot be of this form
+  = ChkWrongForm Form MonoType -- The type of this term cannot be of this form
   | ChkPremiseFails Integer PremiseError
-  | ChkSynthesisedTypeMismatch Type Type -- We found that this term has a different type to what was expected
+  | ChkSynthesisedTypeMismatch MonoType MonoType -- We found that this term has a different type to what was expected
   | ChkCannotSynthesise SynthesisingError -- We can't check the type of this term, nor can we find its type
   deriving (Show)
 
@@ -28,7 +38,7 @@ data SynthesisingError
   | SynPremiseFails Integer PremiseError
   deriving (Show)
 
-typeCheck :: ModalContext -> OrdinaryContext -> Term -> Type -> Maybe CheckingError
+typeCheck :: ModalContext -> OrdinaryContext -> Term -> MonoType -> Maybe CheckingError
 -- B-LAM
 typeCheck mctx octx tm@(Lambda var anno body) ty@(Abstraction fromType toType) | anno == fromType =
   case premise of
@@ -46,20 +56,6 @@ typeCheck mctx octx tm@(Box body) ty@(Boxed bodyType) =
         Just err -> Just (ChkPremiseFails 0 (PrmTypeCheckingFails err))
     where firstPremise = typeCheck mctx OEmpty body bodyType
 typeCheck mctx octx tm@(Box body) ty = Just (ChkWrongForm (FmBoxed FmMetaVariable) ty)
-
--- B-CHECKING-LETBOX
-typeCheck mctx octx tm@(LetBox var ofBody inBody) ty =
-  case firstPremise of
-    Left (Boxed argTy) -> 
-      case secondPremise of 
-        Nothing -> Nothing
-        Just err -> Just (ChkPremiseFails 1 (PrmTypeCheckingFails err))
-      where 
-        secondPremise = typeCheck (MCons var argTy mctx) octx inBody ty
-    Left argTy -> Just (ChkPremiseFails 0 (PrmSynthesisesWrongForm (FmBoxed FmMetaVariable) argTy))
-    Right err -> Just (ChkPremiseFails 0 (PrmTypeSynthesisesFails err))
-  where
-    firstPremise = typeSynthesise mctx octx ofBody
 
 -- B-PAIR
 typeCheck mctx octx tm@(Pair left right) ty@(Product leftTy rightTy) =
@@ -116,6 +112,22 @@ typeCheck mctx octx tm@(Fix var anno body) ty | anno == ty =
     premise = typeCheck mctx (OCons var anno octx) body anno
 typeCheck mctx octx tm@(Fix var anno body) ty = Just (ChkPremiseFails 0 (PrmTypesNotEqual anno ty))
 
+-------- Poly Specific Checking Rules
+-- B-CHECKING-LETBOX-POLY
+typeCheck mctx octx tm@(LetBox var ofBody inBody) ty =
+  case firstPremise of
+    Left (Boxed argTy) -> 
+      case secondPremise of 
+        Nothing -> Nothing
+        Just err -> Just (ChkPremiseFails 1 (PrmTypeCheckingFails err))
+      where 
+        genArgTy = gen mctx octx (Mono argTy)
+        secondPremise = typeCheck (MCons var genArgTy mctx) octx inBody ty
+    Left argTy -> Just (ChkPremiseFails 0 (PrmSynthesisesWrongForm (FmBoxed FmMetaVariable) argTy))
+    Right err -> Just (ChkPremiseFails 0 (PrmTypeSynthesisesFails err))
+  where
+    firstPremise = typeSynthesise mctx octx ofBody
+
 -- B-CHANGE-DIR
 typeCheck inMctx inOctx inTm inTy = 
   case premise of
@@ -124,7 +136,7 @@ typeCheck inMctx inOctx inTm inTy =
       Right err -> Just (ChkCannotSynthesise err)
   where premise = typeSynthesise inMctx inOctx inTm
 
-typeSynthesise :: ModalContext -> OrdinaryContext -> Term -> Either Type SynthesisingError
+typeSynthesise :: ModalContext -> OrdinaryContext -> Term -> Either MonoType SynthesisingError
 -- B-OVAR
 typeSynthesise mctx octx (Var var) =
   case fromOrdinaryContext var octx of
@@ -142,24 +154,6 @@ typeSynthesise mctx octx (Application abs arg) =
     Right err -> Right (SynPremiseFails 0 (PrmTypeSynthesisesFails err))
   where
     synthesisedAbstraction = typeSynthesise mctx octx abs
--- B-MVAR
-typeSynthesise mctx octx (ModalVar mvar) =
-  case fromModalContext mvar mctx of
-    Just ty -> Left ty
-    Nothing -> Right (SynPremiseFails 0 (PrmVariableNotInModalContext mvar))
--- B-SYN-LETBOX
-typeSynthesise mctx octx (LetBox var ofBody inBody) =
-  case firstPremise of
-    Left (Boxed ofType) ->
-      case secondPremise of
-        Left inType -> Left inType
-        Right err -> Right (SynPremiseFails 1(PrmTypeSynthesisesFails err))
-      where
-        secondPremise = typeSynthesise (MCons var ofType mctx) octx inBody
-    Left ty -> Right (SynPremiseFails 0 (PrmSynthesisesWrongForm (FmBoxed FmMetaVariable) ty))
-    Right err -> Right (SynPremiseFails 0 (PrmTypeSynthesisesFails err))
-  where
-    firstPremise = typeSynthesise mctx octx ofBody
 -- B-FIRST
 typeSynthesise mctx octx (First body) =
   case premise of
@@ -201,8 +195,44 @@ typeSynthesise mctx octx (Anno expr ty) =
     Just err -> Right (SynPremiseFails 0 (PrmTypeCheckingFails err))
   where
     premise = typeCheck mctx octx expr ty
+
+-------- Poly Specific Synthesising Rules
+-- B-SYN-LETBOX-POLY
+typeSynthesise mctx octx (LetBox var ofBody inBody) =
+  case firstPremise of
+    Left (Boxed argType) ->
+      case secondPremise of
+        Left inType -> Left inType
+        Right err -> Right (SynPremiseFails 1(PrmTypeSynthesisesFails err))
+      where
+        genArgType = gen mctx octx (Mono argType)
+        secondPremise = typeSynthesise (MCons var genArgType mctx) octx inBody
+    Left ty -> Right (SynPremiseFails 0 (PrmSynthesisesWrongForm (FmBoxed FmMetaVariable) ty))
+    Right err -> Right (SynPremiseFails 0 (PrmTypeSynthesisesFails err))
+  where
+    firstPremise = typeSynthesise mctx octx ofBody
+-- B-MVAR
+typeSynthesise mctx octx (ModalVar mvar) =
+  case fromModalContext mvar mctx of
+    Just (Mono ty) -> Left ty
+    Just ty -> Right (SynPremiseFails 0 (PrmPolyTypeMustBeInstantiated ty))
+    Nothing -> Right (SynPremiseFails 0 (PrmVariableNotInModalContext mvar))
+
+-- B-MVAR-SUBS
+typeSynthesise mctx octx (InstModalVar mvar typeVarMapping) =
+  case fromModalContext mvar mctx of
+    Just varTy -> 
+      case typeInsntiation varTy typeVarMapping of
+        Just ty -> Left ty
+        Nothing -> Right (SynPremiseFails 0 (PrmTypeVariableSubstitutionIncomplete varTy typeVarMapping))
+    Nothing -> Right (SynPremiseFails 0 (PrmVariableNotInModalContext mvar))
+
 -- No Rule
 typeSynthesise mctx octx _ = Right (SynNoRule)
 
-infer :: ModalContext -> OrdinaryContext -> Term -> Either Type SynthesisingError
-infer mctx octx tm = typeSynthesise mctx octx tm
+infer :: ModalContext -> OrdinaryContext -> Term -> Either PolyType SynthesisingError
+infer mctx octx tm = 
+    case result of
+        Left ty -> Left (gen mctx octx (Mono ty))
+        Right err -> Right err
+    where result = typeSynthesise mctx octx tm

@@ -38,4 +38,3 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-

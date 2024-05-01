@@ -23,6 +23,8 @@ source-repository head
 executable modal-mini-ml-exe
   main-is: Main.hs
   other-modules:
+      Monomorphic
+      Polymorphic
       Paths_modal_mini_ml
   hs-source-dirs:
       app
